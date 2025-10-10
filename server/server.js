@@ -20,9 +20,9 @@ await connectDB();
 await connectCloudinary();
 
 const allowedOrigins = [
-  "http://localhost:5173", // local dev (Vite default)
-  "http://localhost:5174", // optional (other local ports)
-  "http://localhost:5175", // ✅ your mention
+  "http://localhost:5176", // local dev (Vite default)
+  "http://localhost:5177", // optional (other local ports)
+  "http://localhost:5178", // ✅ your mention
   "https://yourfrontend.vercel.app", // deployed frontend
 ];
 
