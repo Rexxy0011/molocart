@@ -23,7 +23,7 @@ const allowedOrigins = [
   "http://localhost:5176", // local dev (Vite default)
   "http://localhost:5177", // optional (other local ports)
   "http://localhost:5178", // ✅ your mention
-  "https://yourfrontend.vercel.app", // deployed frontend
+  "https://molocart.vercel.app", // deployed frontend
 ];
 
 // ✅ Stripe Webhook route FIRST (raw body — must come before express.json)
