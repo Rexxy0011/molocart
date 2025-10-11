@@ -15,7 +15,7 @@ const ProductCard = ({ product }) => {
           );
           scrollTo(0, 0);
         }}
-        className="border border-gray-500/20 rounded-md md:px-4 px-3 py-2 bg-white min-w-56 max-w-56 w-full"
+        className="border border-gray-500/20 rounded-md px-3 py-2 bg-white w-full sm:w-[250px] md:w-[220px] flex-shrink-0"
       >
         {/* Product Image */}
         <div className="group cursor-pointer flex items-center justify-center px-2">
@@ -62,7 +62,7 @@ const ProductCard = ({ product }) => {
             <div onClick={(e) => e.stopPropagation()} className="text-primary">
               {!cartItems[product._id] ? (
                 <button
-                  className="flex items-center justify-center gap-1 bg-primary/10 border border-primary/40 md:w-[80px] w-[64px] h-[34px] rounded  font-medium cursor-pointer"
+                  className="flex items-center justify-center gap-1 bg-primary/10 border border-primary/40 md:w-[80px] w-[64px] h-[34px] rounded font-medium cursor-pointer"
                   onClick={() => {
                     addToCart(product._id);
                   }}

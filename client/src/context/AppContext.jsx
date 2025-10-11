@@ -61,24 +61,42 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  // Add to cart
+  // ✅ Add to cart (Login protected)
   const addToCart = (itemId) => {
+    if (!user) {
+      toast.error("Please log in to add items to cart");
+      setShowUserLogin(true);
+      return;
+    }
+
     let cartData = structuredClone(cartItems);
     cartData[itemId] = (cartData[itemId] || 0) + 1;
     setCartItems(cartData);
     toast.success("Added to cart");
   };
 
-  // Update cart item
+  // ✅ Update cart item (Login protected)
   const updateCartItem = (itemId, quantity) => {
+    if (!user) {
+      toast.error("Please log in to update your cart");
+      setShowUserLogin(true);
+      return;
+    }
+
     let cartData = structuredClone(cartItems);
     cartData[itemId] = quantity;
     setCartItems(cartData);
     toast.success("Cart updated");
   };
 
-  // Remove from cart
+  // ✅ Remove from cart (Login protected)
   const removeFromCart = (itemId) => {
+    if (!user) {
+      toast.error("Please log in to remove items from cart");
+      setShowUserLogin(true);
+      return;
+    }
+
     let cartData = structuredClone(cartItems);
     if (cartData[itemId]) {
       cartData[itemId] -= 1;
