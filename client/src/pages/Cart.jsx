@@ -84,14 +84,18 @@ const Cart = () => {
         // -----------------------------------------------------------------
         // 🔥🔥 PAYSTACK INTEGRATION (REPLACES STRIPE — NO OTHER CODE CHANGED)
         // -----------------------------------------------------------------
-        const { data } = await axios.post("/api/order/paystack", {
-          userId: user._id,
-          items: cartArray.map((item) => ({
-            product: item._id,
-            quantity: item.quantity,
-          })),
-          address: selectedAddress._id,
-        });
+        const { data } = await axios.post(
+          "/api/order/paystack",
+          {
+            userId: user._id,
+            items: cartArray.map((item) => ({
+              product: item._id,
+              quantity: item.quantity,
+            })),
+            address: selectedAddress._id,
+          },
+          { withCredentials: true } // 🔥 REQUIRED FIX FOR PRODUCTION AUTH
+        );
 
         if (data.success) {
           window.location.href = data.authorization_url; // redirect to Paystack
