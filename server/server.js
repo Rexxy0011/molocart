@@ -23,6 +23,7 @@ const allowedOrigins = [
   "http://localhost:5177",
   "http://localhost:5178",
   "https://molocart.vercel.app",
+  "https://molocart-backend.vercel.app",
 ];
 
 // ✅ Normal middlewares
