@@ -51,6 +51,7 @@ const Cart = () => {
       toast.error(error.message);
     }
   };
+
   const placeOrder = async () => {
     try {
       if (!selectedAddress) {
@@ -64,7 +65,7 @@ const Cart = () => {
       if (paymentOption === "COD") {
         // ✅ Place order with COD
         const { data } = await axios.post("/api/order/cod", {
-          userId: user._id, // optional if backend gets it from auth middleware
+          userId: user._id,
           items: cartArray.map((item) => ({
             product: item._id,
             quantity: item.quantity,
@@ -80,9 +81,11 @@ const Cart = () => {
           toast.error(data.message);
         }
       } else {
-        // ✅ Place order with Stripe
-        const { data } = await axios.post("/api/order/stripe", {
-          userId: user._id, // optional if backend gets it from auth middleware
+        // -----------------------------------------------------------------
+        // 🔥🔥 PAYSTACK INTEGRATION (REPLACES STRIPE — NO OTHER CODE CHANGED)
+        // -----------------------------------------------------------------
+        const { data } = await axios.post("/api/order/paystack", {
+          userId: user._id,
           items: cartArray.map((item) => ({
             product: item._id,
             quantity: item.quantity,
@@ -91,7 +94,7 @@ const Cart = () => {
         });
 
         if (data.success) {
-          window.location.replace(data.url); // redirect to Stripe checkout
+          window.location.href = data.authorization_url; // redirect to Paystack
         } else {
           toast.error(data.message);
         }
@@ -226,6 +229,7 @@ const Cart = () => {
             >
               Change
             </button>
+
             {showAddress && (
               <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full">
                 {addresses.map((address, index) => (
@@ -282,6 +286,7 @@ const Cart = () => {
               {(getCartAmount() * 2) / 100}
             </span>
           </p>
+
           <p className="flex justify-between text-lg font-medium mt-3">
             <span>Total Amount:</span>
             <span>

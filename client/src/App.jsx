@@ -17,6 +17,7 @@ import SellerLayout from "./pages/seller/SellerLayout";
 import AddProduct from "./pages/seller/AddProduct";
 import ProductList from "./pages/seller/ProductList";
 import Orders from "./pages/seller/Orders";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import Loading from "./components/Loading";
 
 const ProtectedRoute = ({ children }) => {
@@ -75,7 +76,13 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* 🔄 Stripe/Paystack Redirect Loaders */}
           <Route path="/loader" element={<Loading />} />
+
+          {/* ✅ Newly added Paystack success route */}
+          <Route path="/loading" element={<Loading />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
 
           {/* 🧾 Seller Routes */}
           <Route

@@ -10,7 +10,6 @@ import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRout.js";
 import addressRouter from "./routes/addressRoute.js";
 import orderRouter from "./routes/orderRoute.js";
-import { stripeWebhooks } from "./controllers/orderController.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -20,20 +19,13 @@ await connectDB();
 await connectCloudinary();
 
 const allowedOrigins = [
-  "http://localhost:5176", // local dev (Vite default)
-  "http://localhost:5177", // optional (other local ports)
-  "http://localhost:5178", // ✅ your mention
-  "https://molocart.vercel.app", // deployed frontend
+  "http://localhost:5175",
+  "http://localhost:5177",
+  "http://localhost:5178",
+  "https://molocart.vercel.app",
 ];
 
-// ✅ Stripe Webhook route FIRST (raw body — must come before express.json)
-app.post(
-  "/api/order/stripe/webhook",
-  express.raw({ type: "application/json" }), // ✅ Correct MIME type (was "app.json" before)
-  stripeWebhooks
-);
-
-// ✅ Normal middlewares AFTER webhook
+// ✅ Normal middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(
