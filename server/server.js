@@ -15,7 +15,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 // =============================
-// CORS (FIXED FOR VERCEL)
+// CORS CONFIG (EXPRESS v5 SAFE)
 // =============================
 app.use(
   cors({
@@ -26,8 +26,8 @@ app.use(
   })
 );
 
-// Make sure OPTIONS gets handled
-app.options("*", cors());
+// Handle OPTIONS for ALL routes (Express v5)
+app.options(/.*/, cors());
 
 // =============================
 // JSON + Cookies
