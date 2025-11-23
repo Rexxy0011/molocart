@@ -20,15 +20,15 @@ await connectCloudinary();
 
 // ONLY localhost + frontend origin
 const allowedOrigins = [
-  "http://localhost:5175", // dev frontend
-  "https://molocart.vercel.app", // production frontend
+  "http://localhost:5176", // dev frontend
+  "https://Molocart.vercel.app", // production frontend
 ];
 
 // CORS FIRST (must allow cookies)
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // postman etc
+      if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
