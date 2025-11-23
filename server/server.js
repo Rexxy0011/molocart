@@ -14,32 +14,39 @@ import orderRouter from "./routes/orderRoute.js";
 const app = express();
 const port = process.env.PORT || 4000;
 
-// ✅ Connect to DB & Cloudinary
+// Connect DB & Cloudinary
 await connectDB();
 await connectCloudinary();
 
+// ONLY localhost + frontend origin
 const allowedOrigins = [
-  "http://localhost:5175",
-  "http://localhost:5177",
-  "http://localhost:5178",
-  "https://molocart.vercel.app",
-  "https://molocart-backend.vercel.app",
+  "http://localhost:5175", // dev frontend
+  "https://molocart.vercel.app", // production frontend
 ];
 
-// ✅ Normal middlewares
-app.use(express.json());
-app.use(cookieParser());
+// CORS FIRST (must allow cookies)
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // postman etc
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
-// ✅ Basic test route
+// JSON + Cookies
+app.use(express.json());
+app.use(cookieParser());
+
+// Test route
 app.get("/", (req, res) => res.send("API is working!"));
 
-// ✅ Main routes
+// Main routes
 app.use("/api/user", userRouter);
 app.use("/api/seller", sellerRouter);
 app.use("/api/product", productRouter);
@@ -47,5 +54,5 @@ app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
 
-// ✅ Start server
+// Start
 app.listen(port, () => console.log(`Server running on port ${port}`));
