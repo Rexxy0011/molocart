@@ -16,7 +16,7 @@ const port = process.env.PORT || 4000;
 
 const allowedOrigins = [
   "http://localhost:5176", // dev frontend
-  "https://Molocart.vercel.app",
+  "https://molocart.vercel.app",
 ];
 
 app.use(
