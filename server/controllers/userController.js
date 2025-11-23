@@ -2,8 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Register User : /api /users/register
-
+// Register User : /api/user/register
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -13,7 +12,6 @@ export const register = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
-
     if (existingUser)
       return res.json({ success: false, message: "User already exist" });
 
@@ -30,11 +28,11 @@ export const register = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true, //Prevent javascript to access cookie
-      secure: process.env.NODE_ENV === "production", // use secure cookie in production
-
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // CSRF protection
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // 🔥 Added
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({
@@ -48,7 +46,6 @@ export const register = async (req, res) => {
 };
 
 // Login User : /api/user/login
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -61,7 +58,6 @@ export const login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.json({
         success: false,
@@ -70,7 +66,6 @@ export const login = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.json({
         success: false,
@@ -86,6 +81,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // 🔥 Added
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -101,7 +97,7 @@ export const login = async (req, res) => {
 
 export const isAuth = async (req, res) => {
   try {
-    const userId = req.userId; // ✅ safer and cleaner
+    const userId = req.userId;
     const user = await User.findById(userId).select("-password");
     return res.json({ success: true, user });
   } catch (error) {
@@ -111,13 +107,13 @@ export const isAuth = async (req, res) => {
 };
 
 // Logout User : /api/user/logout
-
 export const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, // 🔥 Added
     });
     return res.json({ success: true, message: "Logged Out" });
   } catch (error) {
