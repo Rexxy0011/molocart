@@ -141,7 +141,7 @@ const Cart = () => {
               <div
                 onClick={() => {
                   navigate(
-                    `/product/${product._category.toLowerCase()}/${product._id}`
+                    `/products/${product.category.toLowerCase()}/${product._id}`
                   );
                   scrollTo(0, 0);
                 }}

@@ -80,19 +80,16 @@ const App = () => {
             }
           />
 
-          {/* 🔄 Stripe/Paystack Redirect Loaders */}
-          <Route path="/loader" element={<Loading />} />
-
-          {/* ✅ Newly added Paystack success route */}
+          {/* Paystack redirect + success */}
           <Route path="/loading" element={<Loading />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
 
-          {/* 🧾 Seller Routes */}
+          {/* Seller Routes */}
           <Route
             path="/seller"
             element={isSeller ? <SellerLayout /> : <SellerLogin />}
           >
-            <Route index element={isSeller ? <AddProduct /> : null} />
+            <Route index element={<AddProduct />} />
             <Route path="product-list" element={<ProductList />} />
             <Route path="orders" element={<Orders />} />
           </Route>
