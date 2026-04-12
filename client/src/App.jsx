@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
@@ -23,8 +23,11 @@ import Loading from "./components/Loading";
 const ProtectedRoute = ({ children }) => {
   const { user, setShowUserLogin } = useAppContext();
 
+  useEffect(() => {
+    if (!user) setShowUserLogin(true);
+  }, [user, setShowUserLogin]);
+
   if (!user) {
-    setShowUserLogin(true);
     return <Navigate to="/" replace />;
   }
 

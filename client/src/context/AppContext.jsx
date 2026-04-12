@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -18,6 +18,7 @@ export const AppContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setSearchQuery] = useState({});
+  const skipNextCartSync = useRef(false);
 
   // Fetch seller status
   const fetchSeller = async () => {
@@ -35,8 +36,8 @@ export const AppContextProvider = ({ children }) => {
       const { data } = await axios.get("/api/user/is-auth");
       if (data.success) {
         setUser(data.user);
-        // ✅ Load cart from backend after user login
         if (data.user.cartItems) {
+          skipNextCartSync.current = true;
           setCartItems(data.user.cartItems);
         }
       } else {
@@ -132,8 +133,14 @@ export const AppContextProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  // Sync cart to backend only when user is logged in
+  // Sync cart to backend only when user is logged in AND the change came from a local mutation
   useEffect(() => {
+    if (skipNextCartSync.current) {
+      skipNextCartSync.current = false;
+      return;
+    }
+    if (!user) return;
+
     const updateCart = async () => {
       try {
         const { data } = await axios.post("/api/cart/update", { cartItems });
@@ -145,10 +152,8 @@ export const AppContextProvider = ({ children }) => {
       }
     };
 
-    if (user) {
-      updateCart();
-    }
-  }, [cartItems]);
+    updateCart();
+  }, [cartItems, user]);
 
   const value = {
     navigate,

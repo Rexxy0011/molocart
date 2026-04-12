@@ -7,21 +7,25 @@ import axios from "axios";
 // ✅ Place Order (Cash on Delivery)
 export const placeOrderCOD = async (req, res) => {
   try {
-    const userId = req.userId; // ✅ From auth middleware
+    const userId = req.userId;
     const { items, address } = req.body;
 
-    if (!address || items.length === 0) {
+    if (!address || !items || items.length === 0) {
       return res.json({ success: false, message: "Invalid data" });
     }
 
-    // ✅ Calculate total amount
     let amount = 0;
     for (const item of items) {
       const product = await Product.findById(item.product);
+      if (!product) {
+        return res.json({
+          success: false,
+          message: `Product ${item.product} not found`,
+        });
+      }
       amount += product.offerPrice * item.quantity;
     }
 
-    // ✅ Add 2% tax
     amount += Math.floor(amount * 0.02);
 
     await Order.create({
@@ -32,8 +36,9 @@ export const placeOrderCOD = async (req, res) => {
       paymentType: "COD",
       status: "Order Placed",
       isPaid: false,
-      createdAt: Date.now(),
     });
+
+    await User.findByIdAndUpdate(userId, { cartItems: {} });
 
     return res.json({ success: true, message: "Order Placed Successfully" });
   } catch (error) {
@@ -84,21 +89,20 @@ export const placeOrderPaystack = async (req, res) => {
     }
 
     let amount = 0;
-    let productData = [];
 
-    // Get user to access email (FIX)
     const user = await User.findById(userId);
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
 
-    // Calculate total
     for (const item of items) {
       const product = await Product.findById(item.product);
-
-      productData.push({
-        name: product.name,
-        price: product.offerPrice,
-        quantity: item.quantity,
-      });
-
+      if (!product) {
+        return res.json({
+          success: false,
+          message: `Product ${item.product} not found`,
+        });
+      }
       amount += product.offerPrice * item.quantity;
     }
 
@@ -148,8 +152,8 @@ export const placeOrderPaystack = async (req, res) => {
 export const verifyPaystackPayment = async (req, res) => {
   try {
     const { reference } = req.body;
+    const authUserId = req.userId;
 
-    // VERIFY TRANSACTION
     const verifyRes = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -167,11 +171,28 @@ export const verifyPaystackPayment = async (req, res) => {
 
     const { orderId, userId } = data.metadata;
 
-    // Mark order paid
-    await Order.findByIdAndUpdate(orderId, { isPaid: true });
+    // Ownership check: the authenticated user must own the order
+    if (String(userId) !== String(authUserId)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
 
-    // Clear user cart
-    await User.findByIdAndUpdate(userId, { cartItems: {} });
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    if (String(order.userId) !== String(authUserId)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
+    // Idempotent: if already paid, just confirm
+    if (order.isPaid) {
+      return res.json({ success: true, message: "Payment already verified" });
+    }
+
+    order.isPaid = true;
+    await order.save();
+
+    await User.findByIdAndUpdate(authUserId, { cartItems: {} });
 
     return res.json({
       success: true,

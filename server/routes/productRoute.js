@@ -10,20 +10,11 @@ import {
 
 const productRouter = express.Router();
 
-// ✅ fix multer array syntax
-productRouter.post(
-  "/add",
+productRouter.post("/add", authSeller, upload.array("images"), addProduct);
 
-  upload.array(["images"]),
-  authSeller,
-  addProduct
-);
-
-// ✅ matches frontend axios.get("/api/product/list")
 productRouter.get("/list", productList);
 
-// ✅ matches frontend axios.get(`/api/product/${id}`)
-productRouter.get("/id", productById);
+productRouter.get("/id/:id", productById);
 
 // ✅ matches frontend axios.post("/api/product/stock")
 productRouter.post("/stock", authSeller, changeStock);
