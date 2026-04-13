@@ -8,27 +8,21 @@ const Navbar = () => {
   const {
     user,
     setUser,
+    setUserToken,
+    setCartItems,
     navigate,
     setShowUserLogin,
     setSearchQuery,
     searchQuery,
     getCartCount,
-    axios,
   } = useAppContext();
 
-  const logout = async () => {
-    try {
-      const { data } = await axios.get("/api/user/logout");
-      if (data.success) {
-        toast.success(data.message);
-        setUser(null);
-        navigate("/");
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
+  const logout = () => {
+    setUserToken(null);
+    setUser(null);
+    setCartItems({});
+    toast.success("Logged out");
+    navigate("/");
   };
 
   useEffect(() => {
