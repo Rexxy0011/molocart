@@ -150,7 +150,11 @@ export const placeOrderKorapay = async (req, res) => {
       checkout_url: koraRes.data.data.checkout_url,
     });
   } catch (error) {
-    return res.json({ success: false, message: error.message });
+    console.error("Korapay init failed:", error.response?.data || error.message);
+    return res.json({
+      success: false,
+      message: error.response?.data?.message || error.message,
+    });
   }
 };
 
