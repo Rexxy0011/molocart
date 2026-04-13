@@ -1,12 +1,11 @@
-import React, { useEffect } from "react";
-import axios from "axios";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
+import { useAppContext } from "../context/AppContext";
 import { toast } from "react-hot-toast";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { backendUrl, token } = React.useContext(AppContext);
+  const { axios, setCartItems } = useAppContext();
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -20,14 +19,13 @@ const PaymentSuccess = () => {
       }
 
       try {
-        const { data } = await axios.post(
-          backendUrl + "/api/order/verify-paystack",
-          { reference },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const { data } = await axios.post("/api/order/verify-korapay", {
+          reference,
+        });
 
         if (data.success) {
           toast.success("Payment successful!");
+          setCartItems({});
           navigate("/my-orders");
         } else {
           toast.error(data.message);

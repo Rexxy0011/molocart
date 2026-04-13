@@ -81,11 +81,7 @@ const Cart = () => {
           toast.error(data.message);
         }
       } else {
-        // -----------------------------------------------------------------
-        // 🔥🔥 PAYSTACK INTEGRATION (REPLACES STRIPE — NO OTHER CODE CHANGED)
-        // -----------------------------------------------------------------
-        const { data } = await axios.post("/api/order/paystack", {
-          userId: user._id,
+        const { data } = await axios.post("/api/order/korapay", {
           items: cartArray.map((item) => ({
             product: item._id,
             quantity: item.quantity,
@@ -94,7 +90,7 @@ const Cart = () => {
         });
 
         if (data.success) {
-          window.location.href = data.authorization_url; // redirect to Paystack
+          window.location.href = data.checkout_url;
         } else {
           toast.error(data.message);
         }

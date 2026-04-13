@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 
@@ -79,22 +80,22 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-export const placeOrderPaystack = async (req, res) => {
+// Place Order (Korapay) : /api/order/korapay
+export const placeOrderKorapay = async (req, res) => {
   try {
     const userId = req.userId;
     const { items, address } = req.body;
 
-    if (!address || items.length === 0) {
+    if (!address || !items || items.length === 0) {
       return res.json({ success: false, message: "Invalid data" });
     }
-
-    let amount = 0;
 
     const user = await User.findById(userId);
     if (!user) {
       return res.json({ success: false, message: "User not found" });
     }
 
+    let amount = 0;
     for (const item of items) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -106,10 +107,8 @@ export const placeOrderPaystack = async (req, res) => {
       amount += product.offerPrice * item.quantity;
     }
 
-    // Add 2% tax
     amount += Math.floor(amount * 0.02);
 
-    // Create unpaid order
     const order = await Order.create({
       userId,
       items,
@@ -119,20 +118,28 @@ export const placeOrderPaystack = async (req, res) => {
       isPaid: false,
     });
 
-    // PAYSTACK INITIALIZE
-    const paystackRes = await axios.post(
-      "https://api.paystack.co/transaction/initialize",
+    const reference = `molocart_${crypto.randomUUID()}`;
+    const redirectUrl = `${process.env.FRONTEND_URL}/payment-success`;
+
+    const koraRes = await axios.post(
+      "https://api.korapay.com/merchant/api/v1/charges/initialize",
       {
-        email: user.email, // FIXED ✔ (req.user.email caused error)
-        amount: amount * 100, // Convert NGN → Kobo
+        amount,
+        currency: "NGN",
+        reference,
+        redirect_url: redirectUrl,
+        customer: {
+          email: user.email,
+          name: user.name,
+        },
         metadata: {
           orderId: order._id.toString(),
-          userId,
+          userId: String(userId),
         },
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.KORAPAY_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
       }
@@ -140,25 +147,28 @@ export const placeOrderPaystack = async (req, res) => {
 
     return res.json({
       success: true,
-      authorization_url: paystackRes.data.data.authorization_url,
+      checkout_url: koraRes.data.data.checkout_url,
     });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
 };
 
-// verify payment paystack
-
-export const verifyPaystackPayment = async (req, res) => {
+// Verify Korapay Payment : /api/order/verify-korapay
+export const verifyKorapayPayment = async (req, res) => {
   try {
     const { reference } = req.body;
     const authUserId = req.userId;
 
+    if (!reference) {
+      return res.json({ success: false, message: "Missing reference" });
+    }
+
     const verifyRes = await axios.get(
-      `https://api.paystack.co/transaction/verify/${reference}`,
+      `https://api.korapay.com/merchant/api/v1/charges/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.KORAPAY_SECRET_KEY}`,
         },
       }
     );
@@ -166,12 +176,14 @@ export const verifyPaystackPayment = async (req, res) => {
     const data = verifyRes.data.data;
 
     if (data.status !== "success") {
-      return res.json({ success: false, message: "Payment not successful" });
+      return res.json({
+        success: false,
+        message: `Payment ${data.status}`,
+      });
     }
 
-    const { orderId, userId } = data.metadata;
+    const { orderId, userId } = data.metadata || {};
 
-    // Ownership check: the authenticated user must own the order
     if (String(userId) !== String(authUserId)) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
@@ -184,7 +196,6 @@ export const verifyPaystackPayment = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    // Idempotent: if already paid, just confirm
     if (order.isPaid) {
       return res.json({ success: true, message: "Payment already verified" });
     }

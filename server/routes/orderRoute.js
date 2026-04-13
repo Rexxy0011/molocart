@@ -4,8 +4,8 @@ import {
   getAllOrders,
   getUserOrders,
   placeOrderCOD,
-  placeOrderPaystack,
-  verifyPaystackPayment,
+  placeOrderKorapay,
+  verifyKorapayPayment,
 } from "../controllers/orderController.js";
 import authSeller from "../middlewares/authSeller.js";
 
@@ -15,8 +15,7 @@ orderRouter.post("/cod", authUser, placeOrderCOD);
 orderRouter.get("/user", authUser, getUserOrders);
 orderRouter.get("/seller", authSeller, getAllOrders);
 
-orderRouter.post("/paystack", authUser, placeOrderPaystack);
-
-orderRouter.post("/verify-paystack", authUser, verifyPaystackPayment);
+orderRouter.post("/korapay", authUser, placeOrderKorapay);
+orderRouter.post("/verify-korapay", authUser, verifyKorapayPayment);
 
 export default orderRouter;
