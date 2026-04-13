@@ -3,8 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+
+const TOKEN_KEY = "molocart_token";
+const SELLER_TOKEN_KEY = "molocart_seller_token";
+
+const getStored = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+// Attach whichever token(s) the caller has — server middleware picks the right one.
+axios.interceptors.request.use((config) => {
+  const userToken = getStored(TOKEN_KEY);
+  const sellerToken = getStored(SELLER_TOKEN_KEY);
+  if (userToken) {
+    config.headers.Authorization = `Bearer ${userToken}`;
+  }
+  if (sellerToken) {
+    config.headers["X-Seller-Token"] = sellerToken;
+  }
+  return config;
+});
 
 export const AppContext = createContext();
 
@@ -19,6 +42,16 @@ export const AppContextProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setSearchQuery] = useState({});
   const skipNextCartSync = useRef(false);
+
+  const setUserToken = (token) => {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  };
+
+  const setSellerToken = (token) => {
+    if (token) localStorage.setItem(SELLER_TOKEN_KEY, token);
+    else localStorage.removeItem(SELLER_TOKEN_KEY);
+  };
 
   // Fetch seller status
   const fetchSeller = async () => {
@@ -126,10 +159,10 @@ export const AppContextProvider = ({ children }) => {
     return Math.floor(total * 100) / 100;
   };
 
-  // Initial fetch
+  // Initial fetch — only call auth endpoints if we have a token
   useEffect(() => {
-    fetchUser();
-    fetchSeller();
+    if (getStored(TOKEN_KEY)) fetchUser();
+    if (getStored(SELLER_TOKEN_KEY)) fetchSeller();
     fetchProducts();
   }, []);
 
@@ -177,6 +210,8 @@ export const AppContextProvider = ({ children }) => {
     axios,
     fetchProducts,
     setCartItems,
+    setUserToken,
+    setSellerToken,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
