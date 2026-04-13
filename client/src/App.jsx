@@ -21,15 +21,14 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Loading from "./components/Loading";
 
 const ProtectedRoute = ({ children }) => {
-  const { user, setShowUserLogin } = useAppContext();
+  const { user, authChecked, setShowUserLogin } = useAppContext();
 
   useEffect(() => {
-    if (!user) setShowUserLogin(true);
-  }, [user, setShowUserLogin]);
+    if (authChecked && !user) setShowUserLogin(true);
+  }, [authChecked, user, setShowUserLogin]);
 
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
+  if (!authChecked) return <Loading />;
+  if (!user) return <Navigate to="/" replace />;
 
   return children;
 };

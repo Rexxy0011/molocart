@@ -37,6 +37,7 @@ export const AppContextProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
@@ -78,6 +79,8 @@ export const AppContextProvider = ({ children }) => {
       }
     } catch {
       setUser(null);
+    } finally {
+      setAuthChecked(true);
     }
   };
 
@@ -161,7 +164,11 @@ export const AppContextProvider = ({ children }) => {
 
   // Initial fetch — only call auth endpoints if we have a token
   useEffect(() => {
-    if (getStored(TOKEN_KEY)) fetchUser();
+    if (getStored(TOKEN_KEY)) {
+      fetchUser();
+    } else {
+      setAuthChecked(true);
+    }
     if (getStored(SELLER_TOKEN_KEY)) fetchSeller();
     fetchProducts();
   }, []);
@@ -212,6 +219,7 @@ export const AppContextProvider = ({ children }) => {
     setCartItems,
     setUserToken,
     setSellerToken,
+    authChecked,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
