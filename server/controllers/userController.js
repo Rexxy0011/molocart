@@ -27,15 +27,9 @@ export const register = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return res.json({
       success: true,
+      token,
       user: { email: user.email, name: user.name },
     });
   } catch (error) {
@@ -76,15 +70,9 @@ export const login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return res.json({
       success: true,
+      token,
       user: { email: user.email, name: user.name },
     });
   } catch (error) {
@@ -104,17 +92,7 @@ export const isAuth = async (req, res) => {
   }
 };
 
-// Logout User : /api/user/logout
-export const logout = async (req, res) => {
-  try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-    });
-    return res.json({ success: true, message: "Logged Out" });
-  } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
-  }
+// Logout User : /api/user/logout (no-op server-side; client just drops the token)
+export const logout = async (_req, res) => {
+  return res.json({ success: true, message: "Logged Out" });
 };
