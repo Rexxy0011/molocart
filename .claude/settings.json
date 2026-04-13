@@ -3,7 +3,10 @@
     "allow": [
       "Bash(awk -F= '{print \"prefix:\", substr\\($2,1,7\\), \"length:\", length\\($2\\)}')",
       "Bash(awk -F= '{print $1}' /Users/rex/Desktop/molocart/server/.env)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(grep -E \"\\\\.env$\")",
+      "Bash(git rm:*)",
+      "Bash(git commit -m ':*)"
     ]
   }
 }
