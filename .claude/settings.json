@@ -6,7 +6,11 @@
       "Bash(npm uninstall:*)",
       "Bash(grep -E \"\\\\.env$\")",
       "Bash(git rm:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(48\\).toString\\('base64url'\\)\\)\")",
+      "Bash(curl -s https://molocart-backend.vercel.app/ -w \"\\\\nHTTP %{http_code}\\\\n\" --max-time 10)",
+      "Bash(curl -s https://molocart-backend.vercel.app/api/order/korapay -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -d '{}' --max-time 10)",
+      "Bash(npm run:*)"
     ]
   }
 }
