@@ -121,22 +121,26 @@ export const placeOrderKorapay = async (req, res) => {
     const reference = `molocart_${crypto.randomUUID()}`;
     const redirectUrl = `${process.env.FRONTEND_URL}/payment-success`;
 
+    const payload = {
+      amount: Math.round(amount),
+      currency: "NGN",
+      reference,
+      redirect_url: redirectUrl,
+      customer: {
+        email: user.email,
+        name: user.name,
+      },
+      metadata: {
+        orderId: order._id.toString(),
+        userId: String(userId),
+      },
+    };
+
+    console.log("Korapay payload:", JSON.stringify(payload, null, 2));
+
     const koraRes = await axios.post(
       "https://api.korapay.com/merchant/api/v1/charges/initialize",
-      {
-        amount,
-        currency: "NGN",
-        reference,
-        redirect_url: redirectUrl,
-        customer: {
-          email: user.email,
-          name: user.name,
-        },
-        metadata: {
-          orderId: order._id.toString(),
-          userId: String(userId),
-        },
-      },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${process.env.KORAPAY_SECRET_KEY}`,
