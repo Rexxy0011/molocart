@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 const Navbar = () => {
   const [open, setOpen] = React.useState(false);
+  const location = useLocation();
   const {
     user,
     setUser,
@@ -25,6 +26,16 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const goToContact = () => {
+    setOpen(false);
+    if (location.pathname !== "/") navigate("/");
+    setTimeout(() => {
+      document
+        .getElementById("contact")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   useEffect(() => {
     if (searchQuery.length > 0) {
       navigate("/products");
@@ -41,7 +52,9 @@ const Navbar = () => {
       <div className="hidden sm:flex items-center gap-8">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/products">All product</NavLink>
-        <NavLink to="/">Contact</NavLink>
+        <button onClick={goToContact} className="cursor-pointer">
+          Contact
+        </button>
 
         <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">
           <input
@@ -75,7 +88,7 @@ const Navbar = () => {
             <img src={assets.profile_icon} className="w-10" alt="profile" />
             <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow-md border border-gray-200 py-2.5 w-30 rounded-md text-sm z-40">
               <li
-                onClick={() => navigate("my-orders")}
+                onClick={() => navigate("/my-orders")}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 My Orders
@@ -121,13 +134,13 @@ const Navbar = () => {
             All products
           </NavLink>
           {user && (
-            <NavLink to="/" onClick={() => setOpen(false)}>
+            <NavLink to="/my-orders" onClick={() => setOpen(false)}>
               My Orders
             </NavLink>
           )}
-          <NavLink to="/" onClick={() => setOpen(false)}>
+          <button onClick={goToContact} className="text-left">
             Contact
-          </NavLink>
+          </button>
           {!user ? (
             <button
               onClick={() => {
