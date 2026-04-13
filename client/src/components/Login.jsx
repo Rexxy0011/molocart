@@ -3,7 +3,8 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const Login = () => {
-  const { setShowUserLogin, setUser, axios, navigate } = useAppContext();
+  const { setShowUserLogin, setUser, setUserToken, axios, navigate } =
+    useAppContext();
   const [state, setState] = React.useState("login");
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -19,10 +20,10 @@ const Login = () => {
       });
 
       if (data.success) {
-        // ✅ success → log user in & close modal
-        navigate("/");
+        setUserToken(data.token);
         setUser(data.user);
         setShowUserLogin(false);
+        navigate("/");
       } else {
         // ❌ failure → show toast, keep modal open
         toast.error(data.message);

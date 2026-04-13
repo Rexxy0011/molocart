@@ -3,7 +3,8 @@ import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
 
 const SellerLogin = () => {
-  const { isSeller, setIsSeller, navigate, axios } = useAppContext();
+  const { isSeller, setIsSeller, setSellerToken, navigate, axios } =
+    useAppContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +19,7 @@ const SellerLogin = () => {
       });
 
       if (data.success) {
+        setSellerToken(data.token);
         setIsSeller(true);
         navigate("/seller");
       } else {
